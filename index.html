@@ -1,0 +1,122 @@
+---
+layout: default
+title: Home
+---
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+        }
+
+        #video {
+            height: auto;
+            width: 100vw;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.2s ease;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <video id="video" autoplay muted></video>
+
+    <script>
+        const video = document.getElementById('video');
+    
+        let currentStreamIndex = 0;
+        const streams = [
+            '/pages/stream.m3u8',      // Stream 1
+            '/pages/stream2.m3u8'      // Stream 2
+        ];
+    
+        let hls = null;
+    
+        function loadStream(index) {
+            if (hls) {
+                hls.destroy();
+            }
+    
+            hls = new Hls();
+            hls.loadSource(streams[index]);
+            hls.attachMedia(video);
+        }
+    
+        if (Hls.isSupported()) {
+            loadStream(currentStreamIndex);
+        }
+    
+        // Zoom and Pan State
+        let scale = 1;
+        let panX = 0;
+    
+        const MIN_SCALE = 1;
+        const MAX_SCALE = 3;
+        const ZOOM_STEP = 0.01;
+        const PAN_STEP = 5;
+    
+        let keysPressed = {};
+    
+        function updateTransform() {
+            const screenWidth = window.innerWidth;
+            const visibleWidth = screenWidth;
+            const scaledWidth = visibleWidth * scale;
+            const maxPan = (scaledWidth - visibleWidth) / 2;
+    
+            panX = Math.max(-maxPan, Math.min(panX, maxPan));
+            video.style.transform = `translateX(${panX}px) scale(${scale})`;
+        }
+    
+        function handleMovement() {
+            let needsUpdate = false;
+    
+            if (keysPressed['ArrowUp'] && scale < MAX_SCALE) {
+                scale = Math.min(MAX_SCALE, scale + ZOOM_STEP);
+                needsUpdate = true;
+            }
+            if (keysPressed['ArrowDown'] && scale > MIN_SCALE) {
+                scale = Math.max(MIN_SCALE, scale - ZOOM_STEP);
+                needsUpdate = true;
+            }
+            if (keysPressed['ArrowRight']) {
+                panX -= PAN_STEP;
+                needsUpdate = true;
+            }
+            if (keysPressed['ArrowLeft']) {
+                panX += PAN_STEP;
+                needsUpdate = true;
+            }
+    
+            if (needsUpdate) updateTransform();
+            requestAnimationFrame(handleMovement);
+        }
+    
+        document.addEventListener('keydown', e => {
+            keysPressed[e.key] = true;
+    
+            // Stream switch on 's' key press (or any key you want)
+            if (e.key === 's' || e.key === 'S') {
+                currentStreamIndex = (currentStreamIndex + 1) % streams.length;
+                loadStream(currentStreamIndex);
+            }
+        });
+    
+        document.addEventListener('keyup', e => {
+            keysPressed[e.key] = false;
+        });
+    
+        requestAnimationFrame(handleMovement);
+        window.addEventListener('resize', updateTransform);
+    </script>
+    
+</body>
+
+
+
