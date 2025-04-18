@@ -29,12 +29,13 @@ title: Home
     <video id="video" autoplay muted></video>
 
     <script>
+        // video stream element
         const video = document.getElementById('video');
     
         let currentStreamIndex = 0;
         const streams = [
-            '/pages/stream.m3u8',      // Stream 1
-            '/pages/stream2.m3u8'      // Stream 2
+            '/pages/stream.m3u8',      // stream 1
+            '/pages/stream2.m3u8'      // stream 2
         ];
     
         let hls = null;
@@ -53,7 +54,7 @@ title: Home
             loadStream(currentStreamIndex);
         }
     
-        // Zoom and Pan State
+        // zoom and pan
         let scale = 1;
         let panX = 0;
     
@@ -63,7 +64,8 @@ title: Home
         const PAN_STEP = 5;
     
         let keysPressed = {};
-    //s
+
+        // pan
         function updateTransform() {
             const screenWidth = window.innerWidth;
             const visibleWidth = screenWidth;
@@ -74,6 +76,7 @@ title: Home
             video.style.transform = `translateX(${panX}px) scale(${scale})`;
         }
     
+        // movement
         function handleMovement() {
             let needsUpdate = false;
     
@@ -101,7 +104,7 @@ title: Home
         document.addEventListener('keydown', e => {
             keysPressed[e.key] = true;
     
-            // Stream switch on 's' key press (or any key you want)
+            // press s to switch between feeds
             if (e.key === 's' || e.key === 'S') {
                 currentStreamIndex = (currentStreamIndex + 1) % streams.length;
                 loadStream(currentStreamIndex);
